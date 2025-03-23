@@ -111,6 +111,21 @@ auto transmitRadioSignal(uint8_t channel, const char* message, Color ledColor = 
     printInt("\nTransmission complete\n", printOutColor::printColorNormal, printOutDataType::printUInt32, 0);
 }
 
+auto hacker1(){
+    playSoundFromFile("/RickRoll.wav"); // Correct
+    for(int i = 0; i < 10; i++) {
+        addControlPictureFromFile(4, 0, 0, 0, "rick1.fwi", 1);
+        showPanel(4);
+        waitms(130);
+        addControlPictureFromFile(5, 0, 0, 0, "rick2.fwi", 1);
+        showPanel(5);
+        waitms(130);
+        addControlPictureFromFile(6, 0, 0, 0, "rick3.fwi", 1);
+        showPanel(6);
+        waitms(130);
+    }
+}
+
 WASM_EXPORT int main() {
 
     setup_panels();
@@ -127,40 +142,25 @@ WASM_EXPORT int main() {
             // int length;
             int rssi;
             rssi = RadioGetRSSI(1);
-            if (rssi > -70) {
-                    // length = RadioGetRxCount(1);
-                    // if (length > 1024) {
-                    //         length = 1024;
-                    // }
-
-                    // if (!RadioRead(1, dataBuf, length)) {
-                    //         printInt("\nFailed to read...\n", printOutColor::printColorNormal, printOutDataType::printUInt32, 0);
-                    // } else {
-                    //         for (int i = 0; i < length; i++) {
-                    //                 printInt("\n%d\n", printOutColor::printColorNormal, printOutDataType::printUInt32, dataBuf[i]);
-                    //         }
-                    // }
+            if (rssi > -80) {
                     
-                    playSoundFromFile("/fish4.wav"); // Correct
+                    hacker1();
                     waitms(8000);
-                    addControlPictureFromFile(0, 0, 0, 0, "pip_bot.fwi", 1);
+                    
                     // trigger = true;
                     RadioSetIdle(1);
                     waitms(100);
                     RadioSetRx(1);
             } else {
                     // printInt("\nBad read, RSSI = %d...\n", printOutColor::printColorNormal, printOutDataType::printUInt32, rssi);
+                    showPanel(0);
                     RadioSetIdle(1);
                     waitms(100);
                     RadioSetRx(1);
                     // soundPlayed = false;  // Reset the flag when we lose signal
             }
 
-            // if (trigger == true && !soundPlayed) {
-            //     playSoundFromFile("/fish4.wav"); // Correct
-            //     soundPlayed = true;  // Mark that we've played the sound for this signal
-            // }
-            // trigger = false;
+
 
             waitms(20);
     }

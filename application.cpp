@@ -78,7 +78,6 @@ auto setup_panels() -> void {
     // Setup the main panel that shows pip boy
     addPanel(0, 1, 0, 0, 0, 0, 0, 0, 1);
     addControlPictureFromFile(0, 0, 0, 0, "group.fwi", 1);
-    addControlText(0, 1, 90, 180, 1, 64, WHITE.red, WHITE.green, WHITE.blue, "Press a Button");
     showPanel(0);
     // Setup the rest of the panels
     setPanelMenuText(0, 0, "Gray");
@@ -124,45 +123,88 @@ auto hacker1(){
         showPanel(6);
         waitms(130);
     }
+    addControlPictureFromFile(7, 0, 0, 0, "rick3.fwi", 1);
+    showPanel(7);
+    addControlText(7, 1, 90, 20, 1, 64, WHITE.red, WHITE.green, WHITE.blue, "Connor Homayouni");
+    addControlText(7, 2, 90, 40, 1, 64, WHITE.red, WHITE.green, WHITE.blue, "Git: @chomayouni");
+    addControlText(7, 3, 90, 60, 1, 64, WHITE.red, WHITE.green, WHITE.blue, "Happy GRIZZ HACKS");
+    waitms(8000);
+
 }
+
+struct PanelInfo {
+    const uint8_t index;
+    const FWGuiEventType event_type;
+    const Color color;
+    const char* text;
+    const char* sub_fname;
+};
+
+constexpr std::array Panels{
+    PanelInfo{1, FWGuiEventType::FWGUI_EVENT_GRAY_BUTTON, GRAY, "GRAY", "/radio/white.sub"},
+    PanelInfo{2, FWGuiEventType::FWGUI_EVENT_YELLOW_BUTTON, YELLOW, "YELLOW", "/radio/yellow.sub"},
+    PanelInfo{3, FWGuiEventType::FWGUI_EVENT_GREEN_BUTTON, GREEN, "GREEN", "/radio/green.sub"},
+    PanelInfo{4, FWGuiEventType::FWGUI_EVENT_BLUE_BUTTON, BLUE, "BLUE", "/radio/blue.sub"},
+    PanelInfo{5, FWGuiEventType::FWGUI_EVENT_RED_BUTTON, RED, "RED", "/radio/red.sub"},
+};
 
 WASM_EXPORT int main() {
-
     setup_panels();
-
     RadioSetRx(1);
-
     bool trigger = false;
-    bool soundPlayed = false;  // Track if we've already played the sound for this signal
+    bool soundPlayed = false; // Track if we've already played the sound for this signal
     int loopCount = 0;
-
+    
     while (1)
     {
-            // unsigned char dataBuf[1024];
-            // int length;
-            int rssi;
-            rssi = RadioGetRSSI(1);
-            if (rssi > -80) {
-                    
-                    hacker1();
-                    waitms(8000);
-                    
-                    // trigger = true;
-                    RadioSetIdle(1);
-                    waitms(100);
-                    RadioSetRx(1);
-            } else {
-                    // printInt("\nBad read, RSSI = %d...\n", printOutColor::printColorNormal, printOutDataType::printUInt32, rssi);
-                    showPanel(0);
-                    RadioSetIdle(1);
-                    waitms(100);
-                    RadioSetRx(1);
-                    // soundPlayed = false;  // Reset the flag when we lose signal
-            }
 
+        //Flash LED to indicate transmitting
+        setBoardLED(0, 0, 0, 255, 100, LEDManagerLEDMode::ledflash);
 
+        // Transmit blue.sub at the beginning of each loop
+        RadioTxSubFile(1, "/radio/blue.sub");
+        // Wait for the radio to stop transmitting
+        while (RadioSubFileIsTransmitting() != 0) {
+        waitms(33);
+        }
 
-            waitms(20);
+        // Stop LEDS
+        setBoardLED(0, 0, 0, 0, 0, LEDManagerLEDMode::ledflash);
+
+        // Switch to receive mode explicitly
+        RadioSetIdle(1);
+        waitms(50);
+        RadioSetRx(1);
+        waitms(50);   
+
+      // unsigned char dataBuf[1024];
+      // int length;
+      int rssi;
+      rssi = RadioGetRSSI(1);
+      if (rssi > -87) {
+        if (loopCount == 0){
+            hacker1();
+
+            // trigger = true;
+            RadioSetIdle(1);
+            waitms(100);
+            RadioSetRx(1);
+            loopCount = 200;
+        }
+        else if (loopCount > 0)
+        {
+            loopCount--;
+        }
+        
+
+      } else {
+        // printInt("\nBad read, RSSI = %d...\n", printOutColor::printColorNormal, printOutDataType::printUInt32, rssi);
+        showPanel(0);
+        RadioSetIdle(1);
+        waitms(100);
+        RadioSetRx(1);
+        // soundPlayed = false; // Reset the flag when we lose signal
+      }
+      waitms(20);
     }
-  
-}
+   }
